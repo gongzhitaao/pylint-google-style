@@ -1,0 +1,23 @@
+[project]
+name = "pylint-google-style"
+version = "0.1.0"
+description = "Pylint plugins enforcing Google Python Style Guide"
+requires-python = ">=3.11"
+dependencies = [
+    "pylint>=3.0.0",
+    "astroid>=3.0.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.14,<0.8"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["src"]
+python_files = "*_test.py"
+python_classes = "*Test"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
