@@ -1,4 +1,4 @@
-"""Pylint plugin to enforce module-level imports instead of symbol-level imports.
+"""Enforce module-level imports instead of symbol-level imports.
 
 This plugin detects patterns like:
     from a.b.c.hello import HelloClass
@@ -156,7 +156,8 @@ class ImportModuleChecker(checkers.BaseChecker):
     name = "import-module"
     msgs = {
         "C9001": (
-            "Import module '%s' instead of symbol '%s' (use: from %s import %s)",
+            "Import module '%s' instead of symbol '%s'"
+            " (use: from %s import %s)",
             "import-symbol-not-module",
             "Prefer importing modules over symbols for better code clarity. "
             "Instead of 'from a.b.c import Symbol', use 'from a.b import c' "
@@ -183,7 +184,10 @@ class ImportModuleChecker(checkers.BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<modules>",
-                "help": "Additional module paths to exclude from import-module check.",
+                "help": (
+                    "Additional module paths to exclude"
+                    " from import-module check."
+                ),
             },
         ),
     )

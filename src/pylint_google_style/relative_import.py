@@ -28,8 +28,9 @@ class RelativeImportChecker(checkers.BaseChecker):
         "C9002": (
             "Use absolute import instead of relative import '%s'",
             "relative-import",
-            "Avoid relative imports. Even if the module is in the same package, "
-            "use the full package name. This prevents unintentional duplicate imports.",
+            "Avoid relative imports. Even if the module is in"
+            " the same package, use the full package name."
+            " This prevents unintentional duplicate imports.",
         ),
     }
 
@@ -43,7 +44,7 @@ class RelativeImportChecker(checkers.BaseChecker):
         Args:
             node: The import-from AST node being visited.
         """
-        # Skip __init__.py files (relative imports are common there for re-exports).
+        # Skip __init__.py (relative imports are common for re-exports).
         module = node.root()
         if module.file and module.file.endswith("__init__.py"):
             return

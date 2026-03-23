@@ -2,6 +2,8 @@
 !.gitignore
 !.pre-commit-config.yaml
 !.gitlab-ci.yml
+!.pylintrc
+!.gitlab/
 
 __pycache__/
 *.pyc
