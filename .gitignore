@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.pre-commit-config.yaml
+!.gitlab-ci.yml
 
 __pycache__/
 *.pyc
