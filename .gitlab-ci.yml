@@ -3,9 +3,14 @@ stages:
   - test
   - publish
 
+default:
+  image: python:3.13-slim
+  before_script:
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+
 lint:
   stage: lint
-  image: ghcr.io/astral-sh/uv:latest
   script:
     - uv sync
     - uv run ruff check .
@@ -13,14 +18,12 @@ lint:
 
 test:
   stage: test
-  image: ghcr.io/astral-sh/uv:latest
   script:
     - uv sync
     - uv run pytest
 
 publish:
   stage: publish
-  image: ghcr.io/astral-sh/uv:latest
   script:
     - uv build
     - uv publish
