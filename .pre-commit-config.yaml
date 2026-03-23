@@ -6,7 +6,10 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  - repo: https://github.com/PyCQA/pylint
-    rev: v3.3.6
+  - repo: local
     hooks:
       - id: pylint
+        name: pylint
+        entry: uv run pylint
+        language: system
+        types: [python]

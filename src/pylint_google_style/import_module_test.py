@@ -34,7 +34,9 @@ def _run_pylint(source_path: str, extra_args: list[str] | None = None) -> list:
 class ImportModuleCheckerTest:
     """Test cases for ImportModuleChecker."""
 
-    def test_flags_function_import_basename(self, tmp_path: pathlib.Path) -> None:
+    def test_flags_function_import_basename(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should flag: from os.path import basename (basename is a function)."""
         f = tmp_path / "example.py"
         f.write_text("from os.path import basename\n")
@@ -42,7 +44,9 @@ class ImportModuleCheckerTest:
         assert len(msgs) == 1
         assert msgs[0].symbol == "import-symbol-not-module"
 
-    def test_flags_function_import_dirname(self, tmp_path: pathlib.Path) -> None:
+    def test_flags_function_import_dirname(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should flag: from os.path import dirname (dirname is a function)."""
         f = tmp_path / "example.py"
         f.write_text("from os.path import dirname\n")
@@ -80,14 +84,18 @@ class ImportModuleCheckerTest:
         msgs = _run_pylint(str(f))
         assert len(msgs) == 0
 
-    def test_allows_typing_extensions_imports(self, tmp_path: pathlib.Path) -> None:
+    def test_allows_typing_extensions_imports(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should allow: from typing_extensions import Self (exempt)."""
         f = tmp_path / "example.py"
         f.write_text("from typing_extensions import Self\n")
         msgs = _run_pylint(str(f))
         assert len(msgs) == 0
 
-    def test_allows_collections_abc_imports(self, tmp_path: pathlib.Path) -> None:
+    def test_allows_collections_abc_imports(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should allow: from collections.abc import Mapping (exempt)."""
         f = tmp_path / "example.py"
         f.write_text("from collections.abc import Mapping\n")
@@ -104,7 +112,9 @@ class ImportModuleCheckerTest:
         assert len(msgs) == 1
         assert msgs[0].symbol == "import-module-unresolvable"
 
-    def test_allows_single_level_module_import(self, tmp_path: pathlib.Path) -> None:
+    def test_allows_single_level_module_import(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should allow: from os import path (single-level module import)."""
         f = tmp_path / "example.py"
         f.write_text("from os import path\n")
@@ -118,7 +128,9 @@ class ImportModuleCheckerTest:
         msgs = _run_pylint(str(f))
         assert len(msgs) == 0
 
-    def test_flags_single_level_symbol_import(self, tmp_path: pathlib.Path) -> None:
+    def test_flags_single_level_symbol_import(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should flag: from dataclasses import dataclass (single-level symbol)."""
         f = tmp_path / "example.py"
         f.write_text("from dataclasses import dataclass\n")
@@ -167,7 +179,9 @@ class ImportModuleCheckerTest:
         assert len(msgs) == 1
         assert msgs[0].symbol == "import-module-unresolvable"
 
-    def test_suggests_reexport_from_ancestor(self, tmp_path: pathlib.Path) -> None:
+    def test_suggests_reexport_from_ancestor(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should suggest shallower import when ancestor __all__ re-exports."""
         pkg = tmp_path / "testpkg" / "a" / "b"
         pkg.mkdir(parents=True)
@@ -191,7 +205,9 @@ class ImportModuleCheckerTest:
         assert msgs[0].symbol == "import-symbol-not-module"
         assert "from testpkg import a" in msgs[0].msg
 
-    def test_default_suggestion_without_reexport(self, tmp_path: pathlib.Path) -> None:
+    def test_default_suggestion_without_reexport(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should use default suggestion when no ancestor __all__ re-exports."""
         pkg = tmp_path / "testpkg2" / "a" / "b"
         pkg.mkdir(parents=True)

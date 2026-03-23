@@ -1,6 +1,6 @@
 [project]
 name = "pylint-google-style"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pylint plugins enforcing Google Python Style Guide"
 requires-python = ">=3.11"
 dependencies = [
@@ -22,6 +22,7 @@ dev = [
     "pytest>=9.0.2",
     "ruff>=0.11.0",
     "pre-commit>=4.0.0",
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.ruff]

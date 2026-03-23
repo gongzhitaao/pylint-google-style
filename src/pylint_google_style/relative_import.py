@@ -34,7 +34,15 @@ class RelativeImportChecker(checkers.BaseChecker):
     }
 
     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
-        """Check import-from statements for relative imports."""
+        """Visit a ``from ... import ...`` statement for relative imports.
+
+        Skips ``__init__.py`` files where relative imports are common for
+        re-exports.  Flags all other relative imports with the
+        ``relative-import`` message.
+
+        Args:
+            node: The import-from AST node being visited.
+        """
         # Skip __init__.py files (relative imports are common there for re-exports).
         module = node.root()
         if module.file and module.file.endswith("__init__.py"):
@@ -48,5 +56,9 @@ class RelativeImportChecker(checkers.BaseChecker):
 
 
 def register(linter: lint.PyLinter) -> None:
-    """Register the checker with pylint."""
+    """Register the checker with pylint.
+
+    Args:
+        linter: The pylint linter instance.
+    """
     linter.register_checker(RelativeImportChecker(linter))

@@ -27,7 +27,9 @@ def _run_pylint(source_path: str) -> list:
 class RelativeImportCheckerTest:
     """Test cases for RelativeImportChecker."""
 
-    def test_flags_single_dot_relative_import(self, tmp_path: pathlib.Path) -> None:
+    def test_flags_single_dot_relative_import(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should flag: from .module import something."""
         f = tmp_path / "example.py"
         f.write_text("from .module import SomeClass\n")
@@ -35,7 +37,9 @@ class RelativeImportCheckerTest:
         assert len(msgs) == 1
         assert msgs[0].symbol == "relative-import"
 
-    def test_flags_double_dot_relative_import(self, tmp_path: pathlib.Path) -> None:
+    def test_flags_double_dot_relative_import(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should flag: from ..module import something."""
         f = tmp_path / "example.py"
         f.write_text("from ..utils import helper\n")
@@ -58,7 +62,9 @@ class RelativeImportCheckerTest:
         msgs = _run_pylint(str(f))
         assert len(msgs) == 0
 
-    def test_allows_init_file_relative_imports(self, tmp_path: pathlib.Path) -> None:
+    def test_allows_init_file_relative_imports(
+        self, tmp_path: pathlib.Path
+    ) -> None:
         """Should allow relative imports in __init__.py files."""
         f = tmp_path / "__init__.py"
         f.write_text("from .submodule import something\n")
