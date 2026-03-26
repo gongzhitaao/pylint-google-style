@@ -7,5 +7,6 @@ if python .gitlab/ci/should_publish.py; then
   uv build
   uv publish \
     --publish-url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi" \
-    --token "$CI_JOB_TOKEN"
+    --username gitlab-ci-token \
+    --password "$CI_JOB_TOKEN"
 fi
