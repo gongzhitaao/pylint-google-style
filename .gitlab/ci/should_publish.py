@@ -1,12 +1,19 @@
-"""Check if the current version has a minor/major bump over the latest tag.
+"""Decide whether to publish the package.
 
-Exit 0 if a bump is detected (should publish), exit 1 otherwise.
+Publish (exit 0) when:
+- No package exists on the GitLab Package Registry yet, OR
+- The minor or major version has been bumped compared to the latest git tag.
+
+Skip (exit 1) otherwise.
 """
 
+import os
 import subprocess
 import sys
 import tomllib
 import pathlib
+import urllib.request
+import json
 
 
 def get_current_version() -> str:
@@ -19,6 +26,39 @@ def get_current_version() -> str:
         pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
     )
     return data["project"]["version"]
+
+
+def get_package_name() -> str:
+    """Read the package name from pyproject.toml.
+
+    Returns:
+        The package name, e.g. ``"pylint-google-style"``.
+    """
+    data = tomllib.loads(
+        pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+    )
+    return data["project"]["name"]
+
+
+def package_exists_on_registry() -> bool:
+    """Check whether any version of this package exists on the GitLab registry.
+
+    Returns:
+        True if at least one package version is published.
+    """
+    api_url = os.environ["CI_API_V4_URL"]
+    project_id = os.environ["CI_PROJECT_ID"]
+    token = os.environ["CI_JOB_TOKEN"]
+    name = get_package_name()
+
+    url = (
+        f"{api_url}/projects/{project_id}"
+        f"/packages?package_type=pypi&package_name={name}"
+    )
+    req = urllib.request.Request(url, headers={"JOB-TOKEN": token})
+    with urllib.request.urlopen(req) as resp:
+        packages = json.loads(resp.read())
+    return len(packages) > 0
 
 
 def get_latest_tag_version() -> str | None:
@@ -53,8 +93,13 @@ def minor_version(version: str) -> str:
 
 
 def main() -> None:
-    """Compare current version against the latest git tag."""
+    """Decide whether to publish."""
     current = get_current_version()
+
+    if not package_exists_on_registry():
+        print(f"No package on registry yet.  Publishing {current}.")
+        sys.exit(0)
+
     previous = get_latest_tag_version()
 
     if previous is None:
