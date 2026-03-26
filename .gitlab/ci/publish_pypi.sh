@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Publish to PyPI if the minor or major version has changed.
+# Publish to PyPI when no package exists on the registry yet, or when
+# the minor/major version has been bumped.
 set -euo pipefail
 
-if python .gitlab/ci/version_bumped.py; then
+if python .gitlab/ci/should_publish.py; then
   uv build
   uv publish \
     --publish-url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi" \
