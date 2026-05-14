@@ -68,7 +68,7 @@ def published_versions_gcp() -> set[str]:
         Set of version strings already published.  Empty set when the
         package does not yet exist on the registry.
     """
-    project = os.environ["GCP_PROJECT_ID"]
+    project = os.environ["GCP_AR_PROJECT"]
     location = os.environ["GCP_LOCATION"]
     repo = os.environ["GCP_REPO"]
     name = get_package_name()

@@ -139,9 +139,12 @@ publish-pypi:
   interruptible: false
   variables:
     PUBLISH_TARGETS: "gitlab,gcp"
+    # GCP_AR_PROJECT is the project that hosts the Artifact Registry repo.
+    # It is NOT the inherited GCP_PROJECT_ID group variable, which points
+    # at the GitLab runners' own project.
+    GCP_AR_PROJECT: lucid-volt-449818-h0
     GCP_LOCATION: us-central1
     GCP_REPO: makermaker-pypi
-    # GCP_PROJECT_ID is an inherited group variable.
     # PYLINT_GOOGLE_STYLE_CI_DEPLOYER_B64_JSON is a base64-encoded JSON key
     # for the publisher service account (project/masked CI/CD variable).
   script:

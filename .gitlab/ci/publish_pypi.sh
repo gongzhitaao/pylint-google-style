@@ -30,7 +30,7 @@ authenticate_gcp() {
     gcloud auth activate-service-account --key-file="$key_file"
     rm -f "$key_file"
   fi
-  gcloud config set project "$GCP_PROJECT_ID"
+  gcloud config set project "$GCP_AR_PROJECT"
 }
 
 publish_gitlab() {
@@ -44,7 +44,7 @@ publish_gcp() {
   local token
   token="$(gcloud auth print-access-token)"
   uv publish \
-    --publish-url "https://${GCP_LOCATION}-python.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPO}/" \
+    --publish-url "https://${GCP_LOCATION}-python.pkg.dev/${GCP_AR_PROJECT}/${GCP_REPO}/" \
     --username oauth2accesstoken \
     --password "$token"
 }
