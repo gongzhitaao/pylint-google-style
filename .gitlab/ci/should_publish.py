@@ -1,19 +1,24 @@
-"""Decide whether to publish the package.
+"""Decide whether to publish the package to a given target registry.
 
-Publish (exit 0) when:
-- No package exists on the GitLab Package Registry yet, OR
-- The minor or major version has been bumped compared to the latest git tag.
-
-Skip (exit 1) otherwise.
+Publish (exit 0) when the current version (from pyproject.toml) is not
+already present on the target registry.  Skip (exit 1) otherwise.
 """
 
+import argparse
+import json
 import os
+import pathlib
 import subprocess
 import sys
 import tomllib
-import pathlib
+import urllib.parse
 import urllib.request
-import json
+
+
+def _load_pyproject() -> dict:
+    return tomllib.loads(
+        pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+    )
 
 
 def get_current_version() -> str:
@@ -22,10 +27,7 @@ def get_current_version() -> str:
     Returns:
         The version string, e.g. ``"0.2.0"``.
     """
-    data = tomllib.loads(
-        pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
-    )
-    return data["project"]["version"]
+    return _load_pyproject()["project"]["version"]
 
 
 def get_package_name() -> str:
@@ -34,17 +36,14 @@ def get_package_name() -> str:
     Returns:
         The package name, e.g. ``"pylint-google-style"``.
     """
-    data = tomllib.loads(
-        pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
-    )
-    return data["project"]["name"]
+    return _load_pyproject()["project"]["name"]
 
 
-def package_exists_on_registry() -> bool:
-    """Check whether any version of this package exists on the GitLab registry.
+def published_versions_gitlab() -> set[str]:
+    """List all versions of the package on the GitLab Package Registry.
 
     Returns:
-        True if at least one package version is published.
+        Set of version strings already published.
     """
     api_url = os.environ["CI_API_V4_URL"]
     project_id = os.environ["CI_PROJECT_ID"]
@@ -53,70 +52,90 @@ def package_exists_on_registry() -> bool:
 
     url = (
         f"{api_url}/projects/{project_id}"
-        f"/packages?package_type=pypi&package_name={name}"
+        f"/packages?package_type=pypi&package_name={urllib.parse.quote(name)}"
+        f"&per_page=100"
     )
     req = urllib.request.Request(url, headers={"JOB-TOKEN": token})
     with urllib.request.urlopen(req) as resp:
         packages = json.loads(resp.read())
-    return len(packages) > 0
+    return {p["version"] for p in packages if p.get("name") == name}
 
 
-def get_latest_tag_version() -> str | None:
-    """Get the version from the most recent git tag.
+def published_versions_gcp() -> set[str]:
+    """List all versions of the package on GCP Artifact Registry.
 
     Returns:
-        The tag name (stripped of leading ``v`` if present), or None if
-        no tags exist.
+        Set of version strings already published.  Empty set when the
+        package does not yet exist on the registry.
     """
+    project = os.environ["GCP_PROJECT_ID"]
+    location = os.environ["GCP_LOCATION"]
+    repo = os.environ["GCP_REPO"]
+    name = get_package_name()
+
     result = subprocess.run(
-        ["git", "describe", "--tags", "--abbrev=0"],
+        [
+            "gcloud",
+            "artifacts",
+            "versions",
+            "list",
+            f"--project={project}",
+            f"--location={location}",
+            f"--repository={repo}",
+            f"--package={name}",
+            "--format=value(name)",
+        ],
         capture_output=True,
         text=True,
         check=False,
     )
     if result.returncode != 0:
-        return None
-    return result.stdout.strip().lstrip("v")
+        return set()
+    # Each line is the full resource path; the version is the basename.
+    return {
+        line.rsplit("/", 1)[-1]
+        for line in result.stdout.strip().splitlines()
+        if line
+    }
 
 
-def minor_version(version: str) -> str:
-    """Extract the major.minor portion of a version string.
+def published_versions(target: str) -> set[str]:
+    """Dispatch to the registry-specific version listing.
 
     Args:
-        version: A version string, e.g. ``"1.2.3"``.
+        target: ``"gitlab"`` or ``"gcp"``.
 
     Returns:
-        The ``"major.minor"`` prefix, e.g. ``"1.2"``.
+        Set of version strings already published on the target.
     """
-    parts = version.split(".")
-    return f"{parts[0]}.{parts[1]}"
+    if target == "gitlab":
+        return published_versions_gitlab()
+    if target == "gcp":
+        return published_versions_gcp()
+    raise ValueError(f"Unknown target: {target}")
 
 
 def main() -> None:
-    """Decide whether to publish."""
+    """Decide whether to publish the current version to the given target."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--target",
+        choices=["gitlab", "gcp"],
+        required=True,
+        help="Registry to check.",
+    )
+    args = parser.parse_args()
+
     current = get_current_version()
+    tag = f"[{args.target}]"
+    versions = published_versions(args.target)
 
-    if not package_exists_on_registry():
-        print(f"No package on registry yet.  Publishing {current}.")
-        sys.exit(0)
-
-    previous = get_latest_tag_version()
-
-    if previous is None:
-        print(f"No previous tag found.  Current version: {current}")
-        sys.exit(0)
-
-    curr_minor = minor_version(current)
-    prev_minor = minor_version(previous)
-
-    if curr_minor != prev_minor:
-        print(f"Version bump detected: {previous} -> {current}")
-        sys.exit(0)
-    else:
-        print(
-            f"No minor/major version bump ({previous} -> {current}), skipping."
-        )
+    if current in versions:
+        print(f"{tag} {current} already published, skipping.")
         sys.exit(1)
+
+    print(f"{tag} {current} not yet published, publishing.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
