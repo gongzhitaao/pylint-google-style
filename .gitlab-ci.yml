@@ -133,6 +133,13 @@ publish-pypi:
   stage: publish
   image: $CI_IMAGE
   interruptible: false
+  variables:
+    PUBLISH_TARGETS: "gitlab,gcp"
+    GCP_LOCATION: us-central1
+    GCP_REPO: makermaker-pypi
+    # GCP_PROJECT_ID is an inherited group variable.
+    # PYLINT_GOOGLE_STYLE_CI_DEPLOYER_B64_JSON is a base64-encoded JSON key
+    # for the publisher service account (project/masked CI/CD variable).
   script:
     - bash .gitlab/ci/publish_pypi.sh
   rules:
