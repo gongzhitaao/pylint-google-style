@@ -131,7 +131,11 @@ publish-ci-image:
 
 publish-pypi:
   stage: publish
-  image: $CI_IMAGE
+  # When the Dockerfile changed in this pipeline, publish-ci-image only
+  # promotes the new image to :latest in this same stage (in parallel),
+  # so $CI_IMAGE may still be stale here.  Use the SHA-tagged pending
+  # image built in the build-image stage instead.
+  image: $JOB_IMAGE
   interruptible: false
   variables:
     PUBLISH_TARGETS: "gitlab,gcp"
@@ -144,3 +148,9 @@ publish-pypi:
     - bash .gitlab/ci/publish_pypi.sh
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      changes: *docker-trigger-files
+      variables:
+        JOB_IMAGE: $PENDING_IMAGE
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        JOB_IMAGE: $CI_IMAGE
