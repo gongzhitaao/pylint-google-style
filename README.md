@@ -8,6 +8,12 @@ Pylint plugins that enforce two import rules from the
 2. **Use absolute imports, not relative imports** — prefer
    `from mypackage.utils import helper` over `from ..utils import helper`.
 
+Google publishes an official
+[`pylintrc`](https://google.github.io/styleguide/pylintrc) alongside the style
+guide, but stock pylint has no checkers for these two import rules, so they go
+unenforced. This package fills that gap: use it *together with* Google's
+`pylintrc`, not instead of it.
+
 ## Installation
 
 ```bash
@@ -18,7 +24,13 @@ pip install pylint-google-style
 
 ## Usage
 
-Enable the checkers by loading the plugins in your `.pylintrc`:
+Start from Google's official `pylintrc` as your baseline:
+
+```bash
+curl -O https://google.github.io/styleguide/pylintrc
+```
+
+Then enable these checkers by adding the plugins to that `.pylintrc`:
 
 ```ini
 [MAIN]
