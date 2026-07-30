@@ -1,12 +1,39 @@
 [project]
 name = "pylint-google-style"
 version = "0.1.1"
-description = "Pylint plugins enforcing Google Python Style Guide"
+description = "Pylint plugins enforcing the Google Python Style Guide"
+readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Zhitao Gong", email = "zhitaao.gong@gmail.com" }]
+keywords = [
+    "pylint",
+    "plugin",
+    "linter",
+    "google",
+    "style-guide",
+    "static-analysis",
+    "imports",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = [
     "pylint>=3.0.0",
     "astroid>=3.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/gongzhitaao/pylint-google-style"
+Repository = "https://github.com/gongzhitaao/pylint-google-style"
+Issues = "https://github.com/gongzhitaao/pylint-google-style/issues"
 
 [build-system]
 requires = ["uv_build>=0.7.14,<0.8"]
