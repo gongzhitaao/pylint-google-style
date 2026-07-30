@@ -53,6 +53,7 @@ from os.path import join
 
 # preferred
 from os import path
+
 path.join(...)
 ```
 
