@@ -305,7 +305,17 @@ class ImportModuleChecker(checkers.BaseChecker):
 def register(linter: lint.PyLinter) -> None:
     """Register the checker with pylint.
 
+    Registration is idempotent: under the parallel runner (``pylint -j 2``)
+    pylint re-imports plugins in each worker via
+    ``load_plugin_modules(..., force=True)`` on top of the already-registered
+    checker carried over in the pickled linter.  Without this guard the
+    checker would be registered twice per worker and emit every message
+    twice.
+
     Args:
         linter: The pylint linter instance.
     """
+    for checker in linter.get_checkers():
+        if isinstance(checker, ImportModuleChecker):
+            return
     linter.register_checker(ImportModuleChecker(linter))
